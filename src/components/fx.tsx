@@ -5,7 +5,7 @@ export function Reveal({ children, className, delay = 0 }: { children: ReactNode
   return <motion.div className={className} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }} transition={{ duration: 0.5, delay }}>{children}</motion.div>
 }
 
-const spots = [['⭐', 'left-[4%] top-[18%]', 5], ['🌼', 'right-[5%] top-[30%]', 6], ['✨', 'left-[8%] top-[62%]', 4.5], ['🍃', 'right-[8%] top-[72%]', 5.5], ['🌈', 'left-[46%] top-[88%]', 7]] as const
+const spots = [['⭐', 'left-[4%] top-[18%]', 5], ['🌼', 'right-[5%] top-[30%]', 6], ['🍃', 'right-[8%] top-[72%]', 5.5], ['🌈', 'left-[46%] top-[88%]', 7]] as const
 
 export function Doodles() {
   return (
