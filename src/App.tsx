@@ -35,12 +35,23 @@ export default function App() {
   const n = sorted.length ? shift % sorted.length : 0
   const cards = [...sorted.slice(n), ...sorted.slice(0, n)]
   const today = quests[Math.floor(Date.now() / 864e5) % quests.length]
-  const week = Object.values(notes).filter(n => Date.now() - new Date(n.date).getTime() < 7 * 864e5).length
+  const week = Object.values(notes).filter(n => {
+    const age = Date.now() - new Date(n.date).getTime()
+    return age >= 0 && age < 7 * 864e5
+  }).length
+  const savedQuests = quests.filter(q => saved.includes(q.id))
   const toggleSave = (id: number) => setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
-  const finish = (id: number, note: string) => {
-    if (!done.includes(id)) setNotes(o => ({ ...o, [id]: { date: new Date().toISOString(), note } }))
-    setDone(d => d.includes(id) ? d : [...d, id]); setActive(null); setView('journal'); setParty(true)
-    setTimeout(() => setParty(false), 5000)
+  const finish = (id: number, note: string, date: string) => {
+    setNotes(o => ({ ...o, [id]: { date, note } }))
+    setDone(d => d.includes(id) ? d : [...d, id])
+    setActive(null)
+    setView('journal')
+    setParty(true)
+    window.setTimeout(() => setParty(false), 5000)
+  }
+  const updateJournalEntry = (id: number, note: string, date: string) => {
+    setNotes(o => ({ ...o, [id]: { date, note } }))
+    setActive(null)
   }
   const grid = (list: Quest[]) => <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{list.map((q, i) => <Reveal key={q.id} className="h-full" delay={(i % 3) * 0.08}><QuestCard q={q} i={i} saved={saved.includes(q.id)} done={done.includes(q.id)} onSave={() => toggleSave(q.id)} onOpen={() => setActive(q)} /></Reveal>)}</div>
 
@@ -93,12 +104,12 @@ export default function App() {
               ? <button key={q.id} onClick={() => setActive(q)} aria-label={q.title} className={'grid aspect-square place-items-center rounded-full border border-plum/15 text-5xl shadow-pop ' + looks[q.id].bg}>{looks[q.id].emoji}</button>
               : <span key={q.id} className="grid aspect-square place-items-center rounded-full border-2 border-dashed border-plum/25 font-display text-2xl text-plum/25">?</span>)}
           </div>
-          {done.length > 0 && <div className="mt-8 space-y-4">{quests.filter(q => done.includes(q.id)).map(q => <Reveal key={q.id} className="flex gap-4 rounded-2xl border border-plum/15 bg-white p-4 shadow-pop"><span className={'grid h-16 w-16 shrink-0 place-items-center rounded-2xl text-4xl ' + looks[q.id].bg} aria-hidden>{looks[q.id].emoji}</span><div><h3 className="font-body text-xl font-bold">{q.title}</h3>{notes[q.id] && <p className="text-sm font-bold text-plum-soft">{new Date(notes[q.id].date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</p>}<p className="mt-1 text-plum-soft">{notes[q.id]?.note || 'No note this time.'}</p></div></Reveal>)}</div>}
+          {done.length > 0 && <div className="mt-8 space-y-4">{quests.filter(q => done.includes(q.id)).map(q => <Reveal key={q.id} className="flex items-start gap-4 rounded-2xl border border-plum/15 bg-white p-4 shadow-pop"><span className={'grid h-16 w-16 shrink-0 place-items-center rounded-2xl text-4xl ' + looks[q.id].bg} aria-hidden>{looks[q.id].emoji}</span><div className="min-w-0 flex-1"><h3 className="font-body text-xl font-bold">{q.title}</h3>{notes[q.id] && <p className="text-sm font-bold text-plum-soft">{new Date(notes[q.id].date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</p>}<p className="mt-1 whitespace-pre-wrap break-words text-plum-soft">{notes[q.id]?.note || 'No note this time.'}</p><button onClick={() => setActive(q)} className="mt-3 rounded-full border border-plum/20 bg-cream px-4 py-2 text-sm font-bold hover:bg-sunny" aria-label={'Edit journal entry for ' + q.title}>Edit journal entry</button></div></Reveal>)}</div>}
         </main>
       ) : (
         <main className="mt-8">
           <h1 className="font-display text-5xl font-bold">For a day when you need <span className="text-tomato">an idea</span></h1>
-          {saved.length ? <div className="mt-6">{grid(quests.filter(q => saved.includes(q.id)))}</div> : <p className="mt-6 rounded-2xl border-2 border-dashed border-plum/30 bg-white p-10 text-center text-lg font-semibold text-plum-soft">Nothing saved yet. Tap the bookmark on any quest to keep it for later.</p>}
+          {savedQuests.length ? <div className="mt-6">{grid(savedQuests)}</div> : <p className="mt-6 rounded-2xl border-2 border-dashed border-plum/30 bg-white p-10 text-center text-lg font-semibold text-plum-soft">Nothing saved yet. Tap the bookmark on any quest to keep it for later.</p>}
         </main>
       )}</motion.div></AnimatePresence>
       <Footer />
@@ -108,7 +119,7 @@ export default function App() {
           <button key={id} onClick={() => setView(id)} aria-current={view === id} className={'flex items-center gap-2 rounded-full px-4 py-2.5 font-body text-base font-bold ' + (view === id ? 'bg-sunny' : 'hover:bg-cream')}><Icon size={18} aria-hidden /><span className="hidden min-[400px]:inline">{label}</span><span className="sr-only min-[400px]:hidden">{label}</span></button>
         ))}
       </nav>
-      <AnimatePresence>{active && <QuestModal key={active.id} q={active} done={done.includes(active.id)} onClose={() => setActive(null)} onFinish={n => finish(active.id, n)} />}</AnimatePresence>
+      <AnimatePresence>{active && <QuestModal key={active.id} q={active} done={done.includes(active.id)} initialNote={notes[active.id]?.note || ''} initialDate={notes[active.id]?.date} onClose={() => setActive(null)} onFinish={(n, d) => finish(active.id, n, d)} onSave={(n, d) => updateJournalEntry(active.id, n, d)} />}</AnimatePresence>
     </div>
   )
 }
