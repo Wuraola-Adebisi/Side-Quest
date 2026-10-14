@@ -12,6 +12,7 @@ const quests: Quest[] = [
 ]
 const moods = ['A little curious','Need fresh air','Cozy mode','With my people']
 const filters = ['All quests','Step out','Stay in','Bring someone']
+const navItems = [{name:'Discover',icon:Sparkles},{name:'My journal',icon:Feather},{name:'Saved quests',icon:Bookmark}]
 
 export default function App() {
  const [view,setView] = useState('Discover')
@@ -30,7 +31,7 @@ export default function App() {
   <aside className="sidebar">
    <button className="brand" onClick={() => setView('Discover')}><span className="brand-icon"><Compass size={22}/></span><span>side quest<span className="red">.</span></span></button>
    <p className="side-label">YOUR LITTLE WORLD</p>
-   <nav>{[['Discover',Sparkles],['My journal',Feather],['Saved quests',Bookmark]].map(([name,Icon]) => <button key={String(name)} className={'nav-item '+(view===name?'active':'')} onClick={() => setView(String(name))}><Icon size={17}/>{String(name)}<span>{name==='Discover'?'06':String(name==='My journal'?done.length:saved.length).padStart(2,'0')}</span></button>)}</nav>
+   <nav>{navItems.map(({name,icon:Icon}) => <button key={name} className={'nav-item '+(view===name?'active':'')} onClick={() => setView(name)}><Icon size={17}/>{name}<span>{name==='Discover'?'06':String(name==='My journal'?done.length:saved.length).padStart(2,'0')}</span></button>)}</nav>
    <div className="sidebar-note"><span className="sun-badge"><Sun size={18}/></span><small>A SMALL REMINDER</small><p>You don't need a big plan to have a good day.</p><b>✳</b></div>
    <div className="profile"><span className="avatar">W</span><span><strong>Your adventure</strong><small>Just getting started</small></span><span className="profile-dots">···</span></div>
   </aside>
