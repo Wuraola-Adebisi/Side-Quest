@@ -1,4 +1,4 @@
-import { Compass, Sparkles } from 'lucide-react'
+import { Compass } from 'lucide-react'
 import { Reveal } from '../components/fx'
 import { quests } from '../data'
 
@@ -21,7 +21,6 @@ export default function Home() {
     <main>
       <section className="relative mt-6 grid items-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-apricot/40 to-sunny/30 p-6 sm:p-10 md:grid-cols-2">
             <div>
-              <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-sm font-bold"><Sparkles size={14} />AI quest suggestions coming soon</span>
               <p className="text-sm font-bold uppercase tracking-widest text-tomato">little adventures for ordinary days</p>
               <h1 className="mt-2 font-display text-5xl font-bold leading-[1.05] sm:text-6xl">Make today a little less <span className="rounded-xl bg-sunny/60 px-3">ordinary</span></h1>
               <p className="mt-4 max-w-md text-lg font-semibold text-plum-soft">Tiny quests for your real life. No grand plans, no pressure.</p>
@@ -63,7 +62,7 @@ export default function Home() {
 
       <Reveal className="mt-10"><section aria-labelledby="ai-title" className="relative rounded-3xl border border-plum/15 bg-white p-6 shadow-pop">
             <span className="absolute right-5 top-5 rounded-full bg-sunny/60 px-3 py-1 text-xs font-bold uppercase tracking-widest">Coming soon</span>
-            <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-tomato"><Sparkles size={14} />AI quests</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-tomato">AI quests</p>
             <h2 id="ai-title" className="mt-1 font-display text-3xl font-semibold">Quests made for you</h2>
             <p className="mt-1 max-w-xl text-plum-soft">Describe your day and an AI model will suggest quests that fit. We are building it now.</p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
