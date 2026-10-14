@@ -1,75 +1,114 @@
-import { useState } from 'react'
-import { ArrowRight, ArrowUpRight, Bookmark, Check, Compass, Feather, Heart, MapPin, Moon, Sparkles, Sun, WandSparkles, X } from 'lucide-react'
+import { createElement, useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Bookmark, BookHeart, Coffee, Compass, House, Leaf, Search, Sparkles, Users, WandSparkles } from 'lucide-react'
+import { filters, looks, moods, quests, getQuests, type Quest } from './data'
+import QuestCard from './components/QuestCard'
+import QuestModal from './components/QuestModal'
+import Confetti from './components/Confetti'
+import Footer from './components/Footer'
+import Home from './pages/Home'
+import { Reveal } from './components/fx'
+import { About, Contact, NotFound, Privacy, Terms } from './pages/Pages'
+import { usePersisted, useStored, views, type View } from './lib'
 
-type Quest = { id:number; title:string; description:string; category:string; time:string; cost:string; tone:string; mark:string; steps:string[] }
-const quests: Quest[] = [
- {id:1,title:'Take the long way home',description:'Find a street you have never walked down. See what has been hiding in plain sight.',category:'Step out',time:'20 min',cost:'Free',tone:'peach',mark:'↗',steps:['Choose a familiar destination.','Take one turn you would usually skip.','Find three little details you have never noticed.','Save the best discovery in your journal.']},
- {id:2,title:'Make a tiny joy list',description:'Collect five small things that make an ordinary day feel a bit more yours.',category:'Stay in',time:'10 min',cost:'Free',tone:'lilac',mark:'✳',steps:['Grab a note or open your notes app.','Write down five small things you genuinely enjoy.','Pick one you can do today.','Keep the list for a day that needs brightening.']},
- {id:3,title:'Be a tourist in your town',description:'Visit one nearby spot with the curiosity of someone seeing it for the first time.',category:'Step out',time:'45 min',cost:'₦0–₦2k',tone:'mint',mark:'⌁',steps:['Pick a public place nearby.','Notice one detail you would normally walk past.','Take a photo or make a quick sketch.','Give this little expedition a name.']},
- {id:4,title:'Ask a better question',description:'Have a conversation with someone you like that goes one layer deeper than usual.',category:'Bring someone',time:'15 min',cost:'Free',tone:'butter',mark:'♡',steps:['Choose someone you feel comfortable with.','Ask what they have been looking forward to lately.','Listen without planning your reply.','Share your own answer, too.']},
- {id:5,title:'Rearrange one little corner',description:'Give a tiny part of your space a fresh start using only what you already own.',category:'Stay in',time:'15 min',cost:'Free',tone:'blue',mark:'⌂',steps:['Choose one small surface or corner.','Remove everything from it.','Put back only what you like or use.','Take a before-and-after photo if you fancy.']},
- {id:6,title:'Try the unfamiliar snack',description:'Pick something you have never tasted before and make a small adventure out of it.',category:'Bring someone',time:'30 min',cost:'Your budget',tone:'pink',mark:'✿',steps:['Think of a snack you have never tried.','Find a version that fits your budget.','Try it without multitasking.','Rate it out of ten and record your verdict.']}
-]
-const moods = ['A little curious','Need fresh air','Cozy mode','With my people']
-const filters = ['All quests','Step out','Stay in','Bring someone']
-const navItems = [{name:'Discover',icon:Sparkles},{name:'My journal',icon:Feather},{name:'Saved quests',icon:Bookmark}]
-
-function QuestIllustration({ id }: { id: number }) {
- const common = { fill: 'none', stroke: '#34351E', strokeWidth: 3, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
- return <svg className="quest-illustration" viewBox="0 0 320 160" role="img" aria-label={['A winding path and little flowers','A notebook full of happy thoughts','A map with a destination pin','Two friends chatting','A potted plant and colourful books','A sweet little snack'][id-1]} xmlns="http://www.w3.org/2000/svg">
-  <g {...common}>
-   {id === 1 && <><path d="M20 145 C70 112 105 145 150 105 S225 80 300 20" stroke="#FFFFFF" strokeWidth="23"/><path d="M20 145 C70 112 105 145 150 105 S225 80 300 20" strokeDasharray="3 10" stroke="#34351E" strokeWidth="2"/><circle cx="252" cy="35" r="19" fill="#F07824"/><path d="M53 125 q-4 -20 9 -29 q13 12 5 29 M62 117 q18 -16 24 -4 q-3 15 -24 4" fill="#D7263D"/><path d="M225 85 q-4 -20 9 -29 q13 12 5 29 M234 77 q18 -16 24 -4 q-3 15 -24 4" fill="#FFFFFF"/><path d="M103 138 l-6 -16 M103 138 l11 -12" stroke="#777C35"/></>}
-   {id === 2 && <><path d="M85 30 Q120 17 160 37 Q202 17 235 30 L235 125 Q197 113 160 135 Q121 113 85 125Z" fill="#FFFFFF"/><path d="M160 37 V134" stroke="#D7263D"/><path d="M101 52 l7 7 13 -16 M101 78 l7 7 13 -16 M179 57 h35 M179 77 h28 M179 97 h38" stroke="#777C35" strokeWidth="4"/><path d="M130 94 C112 78 91 96 108 111 L130 129 L151 108 C168 91 145 78 130 94Z" fill="#D7263D"/><path d="M245 45 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4Z" fill="#F07824"/></>}
-   {id === 3 && <><path d="M20 130 Q80 70 140 118 T300 92 V160 H20Z" fill="#777C35"/><path d="M42 132 Q90 100 133 132 T260 110" stroke="#FFFFFF" strokeWidth="12"/><path d="M204 35 C204 17 230 17 230 35 C230 54 217 65 217 65 S204 54 204 35Z" fill="#D7263D"/><circle cx="217" cy="34" r="6" fill="#FFFFFF"/><path d="M74 72 l13 -18 13 18 M87 54 V91" stroke="#34351E"/><circle cx="87" cy="47" r="8" fill="#F07824"/><path d="M266 47 l4 9 9 4 -9 4 -4 9 -4 -9 -9 -4 9 -4Z" fill="#FFFFFF"/></>}
-   {id === 4 && <><path d="M49 28 H143 Q154 28 154 40 V77 Q154 89 143 89 H92 L72 107 V89 H49 Q38 89 38 77 V40 Q38 28 49 28Z" fill="#FFFFFF"/><path d="M178 54 H269 Q280 54 280 66 V99 Q280 111 269 111 H250 V128 L229 111 H178 Q167 111 167 99 V66 Q167 54 178 54Z" fill="#777C3520"/><circle cx="75" cy="58" r="4" fill="#D7263D"/><circle cx="96" cy="58" r="4" fill="#D7263D"/><circle cx="117" cy="58" r="4" fill="#D7263D"/><path d="M194 82 q8 10 16 0 q8 10 16 0" stroke="#777C35" strokeWidth="4"/><path d="M62 132 q-6 -13 5 -20 q11 7 5 20 M72 132 q12 -10 17 -2" fill="#777C35"/><path d="M261 27 l4 9 9 4 -9 4 -4 9 -4 -9 -9 -4 9 -4Z" fill="#F07824"/></>}
-   {id === 5 && <><path d="M75 105 H130 L123 144 H82Z" fill="#D7263D"/><path d="M103 105 C76 78 82 54 101 58 C116 62 111 83 103 105Z" fill="#777C35"/><path d="M103 105 C109 69 134 58 143 73 C150 90 126 103 103 105Z" fill="#777C35"/><path d="M103 105 C72 95 57 76 70 65 C85 57 100 82 103 105Z" fill="#777C35"/><path d="M185 63 H247 V129 H185Z" fill="#F07824"/><path d="M185 81 H247 M185 100 H247" stroke="#FFFFFF" strokeWidth="3"/><path d="M177 62 H238 V73 H177Z" fill="#D7263D"/><path d="M220 40 l4 9 9 4 -9 4 -4 9 -4 -9 -9 -4 9 -4Z" fill="#FFFFFF"/></>}
-   {id === 6 && <><path d="M96 72 H225 L212 132 Q160 151 109 132Z" fill="#FFFFFF"/><path d="M91 72 Q160 51 230 72" stroke="#34351E" strokeWidth="5"/><circle cx="135" cy="69" r="18" fill="#D7263D"/><circle cx="173" cy="61" r="22" fill="#F07824"/><circle cx="197" cy="74" r="14" fill="#777C35"/><path d="M134 47 q-2 -15 10 -19 M171 38 q-5 -14 5 -20 M198 59 q7 -12 17 -10" stroke="#777C35"/><path d="M65 49 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4Z" fill="#FFFFFF"/><path d="M257 91 q-4 -20 9 -29 q13 12 5 29 M266 83 q18 -16 24 -4 q-3 15 -24 4" fill="#D7263D"/></>}
-  </g>
- </svg>
-}
+const moodIcons = [Search, Leaf, Coffee, Users]
+const readView = (): View => { const h = window.location.hash.replace(/^#\/?/, ''); if (!h) return 'home'; return (views as string[]).includes(h) ? (h as View) : 'notfound' }
+const names: Record<View, string> = { home: 'Home', discover: 'Quests', journal: 'Journal', saved: 'Saved quests', about: 'About', terms: 'Terms of Service', privacy: 'Privacy Policy', contact: 'Contact', notfound: 'Page not found' }
+const tabs = [{ id: 'home' as View, label: 'Home', Icon: House }, { id: 'discover' as View, label: 'Quests', Icon: Sparkles }, { id: 'journal' as View, label: 'Journal', Icon: BookHeart }, { id: 'saved' as View, label: 'Saved', Icon: Bookmark }]
 
 export default function App() {
- const [view,setView] = useState('Discover')
- const [filter,setFilter] = useState('All quests')
- const [mood,setMood] = useState(moods[0])
- const [saved,setSaved] = useState<number[]>([])
- const [done,setDone] = useState<number[]>([])
- const [active,setActive] = useState<Quest|null>(null)
- const [surprise,setSurprise] = useState(0)
- const moodOrder: Record<string, number[]> = {
-  'A little curious': [1,3,2,6,4,5],
-  'Need fresh air': [1,3,6,4,2,5],
-  'Cozy mode': [2,5,4,6,1,3],
-  'With my people': [4,6,3,1,2,5],
- }
- const visible = quests.filter(q => filter === 'All quests' || q.category === filter)
- const sorted = [...visible].sort((a,b) => moodOrder[mood].indexOf(a.id) - moodOrder[mood].indexOf(b.id))
- const shift = sorted.length ? surprise % sorted.length : 0
- const cards = shift ? [...sorted.slice(shift), ...sorted.slice(0,shift)] : sorted
- const archive = view === 'My journal' ? quests.filter(q => done.includes(q.id)) : quests.filter(q => saved.includes(q.id))
- const markDone = (id:number) => { setDone(old => old.includes(id) ? old : [...old,id]); setActive(null); setView('My journal') }
+  const [view, setViewState] = useState<View>(readView)
+  useEffect(() => { const f = () => { setViewState(readView()); window.scrollTo(0, 0) }; window.addEventListener('hashchange', f); return () => window.removeEventListener('hashchange', f) }, [])
+  const setView = (v: View) => { window.location.hash = '/' + v }
+  useEffect(() => { document.title = view === 'home' ? 'Side Quest: little adventures for ordinary days' : names[view] + ' | Side Quest' }, [view])
+  const [filter, setFilter] = useState(filters[0])
+  const [mood, setMood] = useState(moods[0])
+  const [saved, setSaved] = usePersisted('sq-saved')
+  const [done, setDone] = usePersisted('sq-done')
+  const [notes, setNotes] = useStored<Record<number, { date: string; note: string }>>('sq-notes', {})
+  const [active, setActive] = useState<Quest | null>(null)
+  const [shift, setShift] = useState(0)
+  const [party, setParty] = useState(false)
+  const [shown, setShown] = useState(9)
 
- return <div className="app">
-  <aside className="sidebar">
-   <button className="brand" onClick={() => setView('Discover')}><span className="brand-icon"><Compass size={22}/></span><span>side quest<span className="red">.</span></span></button>
-   <p className="side-label">YOUR LITTLE WORLD</p>
-   <nav>{navItems.map(({name,icon:Icon}) => <button key={name} className={'nav-item '+(view===name?'active':'')} onClick={() => setView(name)}><Icon size={17}/>{name}<span>{name==='Discover'?'06':String(name==='My journal'?done.length:saved.length).padStart(2,'0')}</span></button>)}</nav>
-   <div className="sidebar-note"><span className="sun-badge"><Sun size={18}/></span><small>A SMALL REMINDER</small><p>You don't need a big plan to have a good day.</p><b>✳</b></div>
-   <div className="profile"><span className="avatar">W</span><span><strong>Your adventure</strong><small>Just getting started</small></span><span className="profile-dots">···</span></div>
-  </aside>
-  <main>
-   <header className="topbar"><div><span>YOUR WORLD</span><i>/</i><strong>{view.toUpperCase()}</strong></div><p><Sun size={14}/> A day full of possibility <span className="avatar small">W</span></p></header>
-   {view === 'Discover' ? <div className="page">
-    <section className="hero">
-     <div className="hero-copy"><div className="eyebrow"><span>✳</span> YOUR DAILY DOSE OF UNEXPECTED</div><h1>Make today a<br/>little less <em>ordinary.</em></h1><p>Tiny adventures for your very real life. No grand plans, no pressure. Just one little thing that makes today feel like yours.</p><button className="primary" onClick={() => document.getElementById('quest-finder')?.scrollIntoView({behavior:'smooth',block:'center'})}>Find my next quest <ArrowRight size={16}/></button><div className="scribble-note">✳ Small plans. Good stories.</div></div>
-     <div className="landscape"><svg className="wanderer-doodle" viewBox="0 0 140 190" aria-label="A tiny explorer with a backpack" role="img"><g stroke="#34351E" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M58 82 Q38 79 39 101 L45 126 L63 121 L64 97Z" fill="#777C35"/><path d="M62 91 Q75 84 82 98 L80 126 L54 126 L53 102Z" fill="#D7263D"/><path d="M59 121 L54 146 L43 158" fill="none"/><path d="M73 122 L78 146 L91 153" fill="none"/><path d="M39 99 L27 117 L34 125" fill="none"/><path d="M80 99 L94 111 L102 103" fill="none"/><circle cx="65" cy="61" r="23" fill="#F07824"/><path d="M43 61 Q38 31 66 34 Q89 33 89 57 L81 50 Q63 56 49 48Z" fill="#34351E"/><circle cx="58" cy="62" r="1.8" fill="#34351E"/><circle cx="72" cy="62" r="1.8" fill="#34351E"/><path d="M60 71 Q65 76 70 70" fill="none"/><path d="M47 54 Q39 66 47 75" fill="none"/><path d="M57 85 Q66 79 77 86" fill="none"/><path d="M42 159 h10 M87 154 h10" fill="none"/><path d="M94 112 l7 -10 7 4 -3 9" fill="#F07824"/><path d="M104 102 l4 -9" fill="none"/><path d="M17 57 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3Z" fill="#FFFFFF"/><path d="M112 54 q-4 -11 4 -16 q9 7 4 16 M120 54 q12 -10 16 -2 q-2 10 -16 2" fill="#D7263D"/></g></svg><span className="land-sun"/><span className="cloud c1"/><span className="cloud c2"/><span className="hill hill1"/><span className="hill hill2"/><span className="path"/><div className="tiny-house"><span/><i/></div><div className="paper-note">TODAY'S<br/>POSSIBILITY <ArrowRight size={13}/></div><div className="round-sticker">GO<br/>WANDER<br/><span>↗</span></div><span className="flower f1">✿</span><span className="flower f2">✳</span><span className="land-caption">there's more out there ↗</span></div>
-     <span className="hero-index">NO. 001 — THE EVERYDAY EXPLORER</span>
-    </section>
-    <section className="finder" id="quest-finder"><div className="section-kicker"><WandSparkles size={14}/> A LITTLE HELP FROM YOUR SIDEKICK</div><div className="finder-title"><div><h2>What kind of day is it?</h2><p>Tell us the vibe. We'll find a quest that fits.</p></div><span>✳</span></div><div className="moods">{moods.map((m,i)=><button key={m} className={'mood '+(mood===m?'chosen':'')} onClick={()=>setMood(m)}><b>{['✳','↗','☾','♡'][i]}</b>{m}{mood===m&&<Check size={13}/>}</button>)}</div><div className="finder-bottom"><span><i/> Made for your time, energy & budget</span><button onClick={()=>setSurprise(n=>n+1)}><WandSparkles size={14}/> Surprise me <ArrowUpRight size={14}/></button></div></section>
-    <section className="quest-section"><div className="section-head"><div><div className="section-kicker">THE QUEST BOARD <span className="red">✳</span></div><h2>A few good possibilities<span className="red">.</span></h2><p>Little things to do. Stories to bring back.</p></div><small>{String(cards.length).padStart(2,'0')} QUESTS FOUND</small></div><div className="filters">{filters.map(f=><button key={f} className={filter===f?'selected':''} onClick={()=>setFilter(f)}>{f}</button>)}<span>PICK YOUR OWN ADVENTURE ↘</span></div><div className="quest-grid">{cards.map((q,i)=><article className="quest-card" key={q.id} style={{animationDelay:(i*60)+'ms'}}><div className="card-top"><span>{q.category}</span><button aria-label="Save quest" className={saved.includes(q.id)?'saved':''} onClick={()=>setSaved(old=>old.includes(q.id)?old.filter(id=>id!==q.id):[...old,q.id])}><Bookmark size={17} fill={saved.includes(q.id)?'currentColor':'none'}/></button></div><div className={'quest-art '+q.tone}><QuestIllustration id={q.id}/><small>A LITTLE SIDE QUEST</small><span className="art-spark">✳</span></div><div className="card-copy"><h3>{q.title}</h3><p>{q.description}</p><div className="meta"><span><Moon size={13}/>{q.time}</span><span>• &nbsp;{q.cost}</span></div><button className="take-quest" onClick={()=>setActive(q)}>{done.includes(q.id)?'Visit your quest':'Take this quest'}<ArrowUpRight size={16}/></button>{done.includes(q.id)&&<span className="done-label"><Check size={11}/> COMPLETED</span>}</div></article>)}</div><div className="section-end">A LITTLE ADVENTURE LOOKS GOOD ON YOU <span>✿</span></div></section>
-    <footer>MADE FOR THE BEAUTIFULLY ORDINARY <span>ONE LITTLE QUEST AT A TIME.</span></footer>
-   </div> : <div className="page archive-page"><div className="section-kicker">{view==='My journal'?<Feather size={14}/>:<Bookmark size={14}/>} {view==='My journal'?'YOUR LITTLE ARCHIVE':'YOUR POCKET FULL OF POSSIBILITIES'}</div><h1>{view==='My journal'?<>Look at you, <em>out there.</em></>:<>For a day when you need <em>an idea.</em></>}</h1><p className="archive-intro">{view==='My journal'?'Every little adventure counts. Here is what you have been up to.':'Keep the quests that caught your eye. Your future self says thanks.'}</p><div className="archive-stat"><span className="sun-badge"><Sun size={20}/></span><div><small>{view==='My journal'?'YOUR ADVENTURE COUNT':'YOUR SAVED IDEAS'}</small><strong>{String(archive.length).padStart(2,'0')} <small>{view==='My journal'?'quests completed':'quests saved'}</small></strong></div><p>No rush. This is your story, at your pace. <span>♡</span></p></div>{archive.length?<div className="quest-grid archive-grid">{archive.map(q=><article className="quest-card" key={q.id}><div className="card-top"><span>{q.category}</span><button onClick={()=>view==='Saved quests'?setSaved(old=>old.filter(id=>id!==q.id)):setActive(q)}>{view==='Saved quests'?<Bookmark size={17} fill="currentColor"/>:<ArrowUpRight size={17}/>}</button></div><div className={'quest-art '+q.tone}><QuestIllustration id={q.id}/><span className="art-spark">✳</span></div><div className="card-copy"><h3>{q.title}</h3><p>{q.description}</p><button className="take-quest" onClick={()=>setActive(q)}>Open quest <ArrowUpRight size={16}/></button></div></article>)}</div>:<div className="empty-state"><span>✳</span><h2>{view==='My journal'?'Your story starts with one little thing.':'Keep a little something for later.'}</h2><p>{view==='My journal'?'Finish a quest and it will find a home here. No streaks, no pressure.':'Save quests that sound like your kind of fun. They will be waiting when you are ready.'}</p><button className="primary" onClick={()=>setView('Discover')}>Browse the quest board <ArrowRight size={16}/></button></div>}<button className="back-link" onClick={()=>setView('Discover')}>← Back to the quest board</button></div>}
-  </main>
-  {active&&<div className="modal-backdrop" onClick={()=>setActive(null)}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onClick={e=>e.stopPropagation()}><button className="close-modal" onClick={()=>setActive(null)} aria-label="Close"><X size={18}/></button><div className={'modal-art '+active.tone}><QuestIllustration id={active.id}/><small>A LITTLE ADVENTURE AWAITS</small></div><div className="modal-copy"><div className="section-kicker"><Sparkles size={14}/> YOUR QUEST AWAITS</div><h2 id="modal-title">{active.title}</h2><p>{active.description}</p><div className="modal-meta"><span><Moon size={14}/>{active.time}</span><span><MapPin size={14}/>{active.category}</span><span>{active.cost}</span></div><div className="steps-head">THE LITTLE PLAN <span>01 — 0{active.steps.length}</span></div><ol>{active.steps.map((s,i)=><li key={s}><b>{String(i+1).padStart(2,'0')}</b><span>{s}</span></li>)}</ol><div className="kind-note"><Heart size={15}/> Make it your own. There is no wrong way to have a little adventure.</div><button className="primary finish" onClick={()=>markDone(active.id)}>{done.includes(active.id)?'Already in your journal':'I did the thing!'} <Sparkles size={16}/></button></div></section></div>}
- </div>
+  const sorted = getQuests({ mood, filter })
+  const n = sorted.length ? shift % sorted.length : 0
+  const cards = [...sorted.slice(n), ...sorted.slice(0, n)]
+  const today = quests[Math.floor(Date.now() / 864e5) % quests.length]
+  const week = Object.values(notes).filter(n => Date.now() - new Date(n.date).getTime() < 7 * 864e5).length
+  const toggleSave = (id: number) => setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
+  const finish = (id: number, note: string) => {
+    if (!done.includes(id)) setNotes(o => ({ ...o, [id]: { date: new Date().toISOString(), note } }))
+    setDone(d => d.includes(id) ? d : [...d, id]); setActive(null); setView('journal'); setParty(true)
+    setTimeout(() => setParty(false), 5000)
+  }
+  const grid = (list: Quest[]) => <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{list.map((q, i) => <Reveal key={q.id} className="h-full" delay={(i % 3) * 0.08}><QuestCard q={q} i={i} saved={saved.includes(q.id)} done={done.includes(q.id)} onSave={() => toggleSave(q.id)} onOpen={() => setActive(q)} /></Reveal>)}</div>
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 pb-32 pt-6 sm:px-8">
+      {party && <Confetti />}
+      <button onClick={() => document.getElementById('main')?.focus()} className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:rounded-full focus:bg-sunny focus:px-4 focus:py-2 focus:font-bold">Skip to content</button>
+      <header className="flex items-center justify-between">
+        <button onClick={() => setView('home')} className="flex items-center gap-2 font-display text-3xl font-bold">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-plum text-cream"><Compass size={22} strokeWidth={1.75} /></span>side quest
+        </button>
+        <span className="rounded-full bg-white px-4 py-2 text-sm font-extrabold ring-2 ring-plum/15">{done.length} completed{week > 0 && ' · ' + week + ' this week'}</span>
+      </header>
+
+      <AnimatePresence mode="wait"><motion.div id="main" tabIndex={-1} className="outline-none" key={view} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.25 }}>{view === 'about' ? <About /> : view === 'terms' ? <Terms /> : view === 'privacy' ? <Privacy /> : view === 'contact' ? <Contact /> : view === 'notfound' ? <NotFound /> : view === 'home' ? <Home /> : view === 'discover' ? (
+        <main>
+          <div className="mt-8"><h1 className="font-display text-5xl font-bold">Find your next <span className="text-tomato">quest</span></h1><p className="mt-2 text-lg font-semibold text-plum-soft">Pick a mood, filter by the kind of day you want, or let us surprise you.</p></div>
+
+          <Reveal className="mt-10"><button onClick={() => setActive(today)} className={'flex w-full items-center gap-4 rounded-2xl border border-plum/15 p-4 text-left shadow-pop transition hover:-translate-y-1 ' + looks[today.id].bg}><span className="text-6xl" aria-hidden>{looks[today.id].emoji}</span><span><span className="text-sm font-bold uppercase tracking-widest">quest of the day</span><span className="block font-display text-2xl font-semibold">{today.title}</span><span className="block font-semibold text-plum-soft">{today.time} · {today.cost}</span></span></button></Reveal>
+
+          <section id="finder" className="mt-10">
+            <h2 className="font-display text-3xl font-semibold">What kind of day is it?</h2>
+            <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              {moods.map((m, i) => (
+                <button key={m} onClick={() => setMood(m)} aria-pressed={mood === m} className={'rounded-2xl border border-plum/15 p-4 text-center font-body text-lg font-bold shadow-pop ' + (mood === m ? 'scale-105 bg-sunny' : 'bg-white hover:bg-leaf/40')}>
+                  {createElement(moodIcons[i], { className: 'mx-auto mb-2', size: 30, strokeWidth: 1.5 })}{m}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          
+
+          <section className="mt-10">
+            <h2 className="font-display text-3xl font-semibold">Hand-picked quests</h2>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {filters.map(f => <button key={f} onClick={() => { setFilter(f); setShown(9) }} className={'rounded-full border border-plum/20 px-4 py-2 text-sm font-extrabold ' + (filter === f ? 'bg-plum text-cream' : 'bg-white')}>{f}</button>)}
+              <button onClick={() => setShift(s => s + 1)} className="ml-auto flex items-center gap-2 rounded-full border border-plum/20 bg-mint px-4 py-2 text-sm font-extrabold"><WandSparkles size={16} />Surprise me</button>
+            </div>
+            <div className="mt-6">{grid(cards.slice(0, shown))}</div>
+            {cards.length > shown && <div className="mt-8 text-center"><button onClick={() => setShown(s => s + 9)} className="rounded-full border border-plum/15 bg-white px-7 py-3 font-body text-lg font-bold shadow-pop hover:bg-sunny">Show more quests</button></div>}
+          </section>
+        </main>
+      ) : view === 'journal' ? (
+        <main className="mt-8">
+          <h1 className="font-display text-5xl font-bold">Your <span className="text-tomato">journal</span></h1>
+          <p className="mt-2 text-lg font-semibold text-plum-soft">Every completed quest is added here. {done.length} of {quests.length} collected.</p>
+          <div className="mt-6 grid grid-cols-3 gap-4 rounded-3xl border-2 border-dashed border-plum/40 bg-white p-6 sm:grid-cols-6">
+            {quests.map(q => done.includes(q.id)
+              ? <button key={q.id} onClick={() => setActive(q)} aria-label={q.title} className={'grid aspect-square place-items-center rounded-full border border-plum/15 text-5xl shadow-pop ' + looks[q.id].bg}>{looks[q.id].emoji}</button>
+              : <span key={q.id} className="grid aspect-square place-items-center rounded-full border-2 border-dashed border-plum/25 font-display text-2xl text-plum/25">?</span>)}
+          </div>
+          {done.length > 0 && <div className="mt-8 space-y-4">{quests.filter(q => done.includes(q.id)).map(q => <Reveal key={q.id} className="flex gap-4 rounded-2xl border border-plum/15 bg-white p-4 shadow-pop"><span className={'grid h-16 w-16 shrink-0 place-items-center rounded-2xl text-4xl ' + looks[q.id].bg} aria-hidden>{looks[q.id].emoji}</span><div><h3 className="font-body text-xl font-bold">{q.title}</h3>{notes[q.id] && <p className="text-sm font-bold text-plum-soft">{new Date(notes[q.id].date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</p>}<p className="mt-1 text-plum-soft">{notes[q.id]?.note || 'No note this time.'}</p></div></Reveal>)}</div>}
+        </main>
+      ) : (
+        <main className="mt-8">
+          <h1 className="font-display text-5xl font-bold">For a day when you need <span className="text-tomato">an idea</span></h1>
+          {saved.length ? <div className="mt-6">{grid(quests.filter(q => saved.includes(q.id)))}</div> : <p className="mt-6 rounded-2xl border-2 border-dashed border-plum/30 bg-white p-10 text-center text-lg font-semibold text-plum-soft">Nothing saved yet. Tap the bookmark on any quest to keep it for later.</p>}
+        </main>
+      )}</motion.div></AnimatePresence>
+      <Footer />
+
+      <nav aria-label="Main" className="fixed bottom-4 left-1/2 z-30 flex -translate-x-1/2 gap-1 rounded-full border border-plum/15 bg-white p-1.5 shadow-pop">
+        {tabs.map(({ id, label, Icon }) => (
+          <button key={id} onClick={() => setView(id)} aria-current={view === id} className={'flex items-center gap-2 rounded-full px-4 py-2.5 font-body text-base font-bold ' + (view === id ? 'bg-sunny' : 'hover:bg-cream')}><Icon size={18} aria-hidden /><span className="hidden min-[400px]:inline">{label}</span><span className="sr-only min-[400px]:hidden">{label}</span></button>
+        ))}
+      </nav>
+      <AnimatePresence>{active && <QuestModal key={active.id} q={active} done={done.includes(active.id)} onClose={() => setActive(null)} onFinish={n => finish(active.id, n)} />}</AnimatePresence>
+    </div>
+  )
 }

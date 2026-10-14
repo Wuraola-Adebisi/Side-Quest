@@ -1,16 +1,13 @@
 # Side Quest
 
-**Little adventures for your very ordinary days.**
+Little adventures for your very ordinary days. Pick a mood, take a tiny quest, tick off the steps and collect a sticker in your journal.
 
-Side Quest is a whimsical everyday adventure companion. It helps people discover achievable real-world quests that fit their mood, time, budget and surroundings, then turn completed adventures into a personal journal.
-
-## Prototype features
-- Responsive illustrated discovery page
-- Mood selection and quest category filters
-- Quest details with actionable steps
-- Save quests for later
-- Mark quests complete and keep a journal
-- Original CSS-built landscape and quest illustrations
+## Features
+- 26 starter quests with mood sorting, category filters and a quest of the day
+- Journal with a sticker book, dated entries and optional notes
+- Saved quests, a weekly counter and confetti on completion
+- About, Terms of Service, Privacy Policy, Contact and 404 pages (hash routing)
+- Progress is stored in the browser (localStorage); there is no backend yet
 
 ## Run locally
 ```bash
@@ -18,10 +15,13 @@ npm install
 npm run dev
 ```
 
-## Build
-```bash
-npm run build
-npm run preview
-```
+## Deploy to Vercel
+Import the GitHub repo. Vercel detects Vite: build command `npm run build`, output directory `dist`. Hash routing needs no rewrites.
 
-AI provider integration, persistent storage, authentication and live place discovery are not connected yet. The current prototype uses local demo data.
+## Before launch
+- Set `CONTACT_EMAIL` in `src/lib.ts`
+- In `index.html`, change the `og:image` content to the full URL of your deployed `/og.png`
+- Have the Terms and Privacy text reviewed by a qualified person
+
+## Adding AI later
+`getQuests` in `src/data.ts` is the single place quests are chosen. Replace its body with a call to an endpoint that invokes an AI model (for example Amazon Bedrock behind API Gateway and Lambda). When AI ships, update the Privacy page to say that preference inputs are sent to an AI provider.
