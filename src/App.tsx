@@ -88,7 +88,7 @@ export default function App() {
           <section className="mt-10">
             <h2 className="font-display text-3xl font-semibold">Hand-picked quests</h2>
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              {filters.map(f => <button key={f} onClick={() => { setFilter(f); setShown(9) }} className={'rounded-full border border-plum/20 px-4 py-2 text-sm font-extrabold ' + (filter === f ? 'bg-plum text-cream' : 'bg-white')}>{f}</button>)}
+              {filters.map(f => <button key={f} aria-pressed={filter === f} onClick={() => { setFilter(f); setShown(9) }} className={'rounded-full border border-plum/20 px-4 py-2 text-sm font-extrabold ' + (filter === f ? 'bg-plum text-cream' : 'bg-white')}>{f}</button>)}
               <button onClick={() => setShift(s => s + 1)} className="ml-auto flex items-center gap-2 rounded-full border border-plum/20 bg-mint px-4 py-2 text-sm font-extrabold"><WandSparkles size={16} />Surprise me</button>
             </div>
             <div className="mt-6">{grid(cards.slice(0, shown))}</div>
