@@ -1,6 +1,6 @@
 import { createElement, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Bookmark, BookHeart, Coffee, Compass, House, Leaf, Search, Sparkles, Users, WandSparkles } from 'lucide-react'
+import { Bookmark, BookHeart, Coffee, Compass, House, Leaf, Search, Users } from 'lucide-react'
 import { filters, looks, moods, quests, getQuests, type Quest } from './data'
 import QuestCard from './components/QuestCard'
 import QuestModal from './components/QuestModal'
@@ -14,7 +14,7 @@ import { usePersisted, useStored, views, type View } from './lib'
 const moodIcons = [Search, Leaf, Coffee, Users]
 const readView = (): View => { const h = window.location.hash.replace(/^#\/?/, ''); if (!h) return 'home'; return (views as string[]).includes(h) ? (h as View) : 'notfound' }
 const names: Record<View, string> = { home: 'Home', discover: 'Quests', journal: 'Journal', saved: 'Saved quests', about: 'About', terms: 'Terms of Service', privacy: 'Privacy Policy', contact: 'Contact', notfound: 'Page not found' }
-const tabs = [{ id: 'home' as View, label: 'Home', Icon: House }, { id: 'discover' as View, label: 'Quests', Icon: Sparkles }, { id: 'journal' as View, label: 'Journal', Icon: BookHeart }, { id: 'saved' as View, label: 'Saved', Icon: Bookmark }]
+const tabs = [{ id: 'home' as View, label: 'Home', Icon: House }, { id: 'discover' as View, label: 'Quests', Icon: Search }, { id: 'journal' as View, label: 'Journal', Icon: BookHeart }, { id: 'saved' as View, label: 'Saved', Icon: Bookmark }]
 
 export default function App() {
   const [view, setViewState] = useState<View>(readView)
@@ -89,7 +89,7 @@ export default function App() {
             <h2 className="font-display text-3xl font-semibold">Hand-picked quests</h2>
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {filters.map(f => <button key={f} aria-pressed={filter === f} onClick={() => { setFilter(f); setShown(9) }} className={'rounded-full border border-plum/20 px-4 py-2 text-sm font-extrabold ' + (filter === f ? 'bg-plum text-cream' : 'bg-white')}>{f}</button>)}
-              <button onClick={() => setShift(s => s + 1)} className="ml-auto flex items-center gap-2 rounded-full border border-plum/20 bg-mint px-4 py-2 text-sm font-extrabold"><WandSparkles size={16} />Surprise me</button>
+              <button onClick={() => setShift(s => s + 1)} className="ml-auto flex items-center gap-2 rounded-full border border-plum/20 bg-mint px-4 py-2 text-sm font-extrabold">Surprise me</button>
             </div>
             <div className="mt-6">{grid(cards.slice(0, shown))}</div>
             {cards.length > shown && <div className="mt-8 text-center"><button onClick={() => setShown(s => s + 9)} className="rounded-full border border-plum/15 bg-white px-7 py-3 font-body text-lg font-bold shadow-pop hover:bg-sunny">Show more quests</button></div>}
