@@ -36,8 +36,16 @@ export default function App() {
  const [done,setDone] = useState<number[]>([])
  const [active,setActive] = useState<Quest|null>(null)
  const [surprise,setSurprise] = useState(0)
+ const moodOrder: Record<string, number[]> = {
+  'A little curious': [1,3,2,6,4,5],
+  'Need fresh air': [1,3,6,4,2,5],
+  'Cozy mode': [2,5,4,6,1,3],
+  'With my people': [4,6,3,1,2,5],
+ }
  const visible = quests.filter(q => filter === 'All quests' || q.category === filter)
- const cards = surprise % 2 ? [...visible].reverse() : visible
+ const sorted = [...visible].sort((a,b) => moodOrder[mood].indexOf(a.id) - moodOrder[mood].indexOf(b.id))
+ const shift = sorted.length ? surprise % sorted.length : 0
+ const cards = shift ? [...sorted.slice(shift), ...sorted.slice(0,shift)] : sorted
  const archive = view === 'My journal' ? quests.filter(q => done.includes(q.id)) : quests.filter(q => saved.includes(q.id))
  const markDone = (id:number) => { setDone(old => old.includes(id) ? old : [...old,id]); setActive(null); setView('My journal') }
 
