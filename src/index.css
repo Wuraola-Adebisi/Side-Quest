@@ -20,3 +20,10 @@
 .modal-art>small{z-index:4;padding:5px 9px;background:#fff8e9e8;border:1px solid #493b5940;border-radius:999px;color:#5e6d59}
 .hero-copy:after{content:'♡';position:absolute;left:48%;bottom:42px;color:#ef6f78;font:700 37px 'Caveat',cursive;transform:rotate(13deg)}
 @media(max-width:720px){.hero-copy:after{left:auto;right:23px;bottom:18px;font-size:29px}.quest-illustration{padding:3px}.modal-art .quest-illustration{padding:4px}}
+
+.wanderer-doodle{position:absolute;z-index:4;width:145px;height:196px;right:25%;bottom:42px;overflow:visible;filter:drop-shadow(3px 4px 0 #493b5915);animation:little-bob 3.8s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes little-bob{0%,100%{translate:0 0;rotate:-1deg}50%{translate:0 -5px;rotate:1deg}}
+.land-caption{z-index:5}
+@media(max-width:720px){.wanderer-doodle{width:118px;height:160px;right:22%;bottom:32px}}
+@media(max-width:520px){.wanderer-doodle{width:103px;height:142px;right:19%;bottom:27px}}
+@media(prefers-reduced-motion:reduce){.wanderer-doodle{animation:none}}
